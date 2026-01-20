@@ -1,0 +1,194 @@
+WebWaka Modular Rebuild — Phase 4D: Tenant Dashboard (Declarative Consumer)
+
+⸻
+
+CONTEXT
+
+You are operating as an implementation platform (Replit) on behalf of the WebWaka Modular Rebuild.
+
+This task implements Phase 4D, which is the Tenant Dashboard, following and consuming the already-completed:
+	•	Phase 4A — Core Dashboard Control Model
+	•	Phase 4B — Super Admin Dashboard (Declarative)
+	•	Phase 4C — Partner Dashboard (Declarative)
+
+This phase is constitutionally locked and must not deviate.
+
+⸻
+
+HARD CONSTRAINTS (NON-NEGOTIABLE)
+
+🚫 DO NOT invent access logic
+🚫 DO NOT hardcode roles
+🚫 DO NOT bypass Phase 4A engine
+🚫 DO NOT implement business logic
+🚫 DO NOT implement backend services
+🚫 DO NOT implement UI styling or frontend frameworks
+
+✅ This is a pure declarative dashboard consumer
+
+⸻
+
+SOURCE OF TRUTH
+	•	Constitution: WebWaka Ecosystem Constitution v1.4 (Ratified)
+	•	Core Engine: webwaka-core-dashboard-control
+	•	Evaluation primitives:
+	•	Permissions
+	•	Entitlements
+	•	Feature Flags
+	•	Resolution engine: Phase 4A ONLY
+
+⸻
+
+TARGET REPOSITORY
+
+Repository: webwaka-suite-tenant-dashboard
+(This repo already exists and is configured. Do NOT create a new repo.)
+
+⸻
+
+OBJECTIVE
+
+Implement the Tenant Dashboard as a pure declarative dashboard definition that:
+	•	Defines tenant-visible sections
+	•	Uses permissions, entitlements, and feature flags only for gating
+	•	Resolves visibility exclusively through Phase 4A
+	•	Supports offline snapshot evaluation
+	•	Is fully deterministic and explainable
+
+⸻
+
+REQUIRED DELIVERABLES
+
+1️⃣ Dashboard Declaration (Pure Data)
+
+Create pure, serializable declarations only:
+
+src/dashboards/tenant.dashboard.ts
+src/dashboards/tenant.sections.ts
+
+Rules:
+	•	No functions inside declarations
+	•	JSON-serializable
+	•	Deterministic ordering
+	•	No environment access
+
+⸻
+
+2️⃣ REQUIRED TENANT DASHBOARD SECTIONS
+
+Implement exactly the following sections and gating:
+
+#	Section	Permissions	Entitlements	Feature Flags
+1	Tenant Overview	tenant:overview:read	—	—
+2	Users & Roles	users:read	user-management	—
+3	Products / Services	catalog:read	—	—
+4	Sales / POS	pos:read	pos-access	pos-enabled
+5	Inventory	inventory:read	inventory-access	inventory-enabled
+6	Billing & Subscriptions	billing:read	billing-access	—
+7	Receipts & Transactions	receipts:read	—	—
+8	Incentives & Rewards	incentives:read	incentives-access	incentives-enabled
+9	Branding (Tenant-level)	branding:read	tenant-branding	whitelabel-enabled
+10	Audit & Activity	audit:read	audit-access	—
+11	AI / Automation	ai:read	ai-access	ai-features-enabled
+12	Settings	tenant:settings:read	—	—
+
+⚠️ Do NOT add or remove sections
+⚠️ Do NOT relax gating rules
+
+⸻
+
+3️⃣ Dashboard Resolution Engine (Consumer Only)
+
+Create a thin consumer layer that calls Phase 4A:
+
+src/engine/tenantDashboardResolver.ts
+
+Must use:
+	•	resolveDashboard(declaration, context)
+	•	generateDashboardSnapshot(resolved, expirationHours?)
+	•	verifyDashboardSnapshot(snapshot)
+	•	evaluateFromSnapshot(snapshot)
+
+🚫 No custom evaluation logic allowed.
+
+⸻
+
+4️⃣ Snapshot Support (MANDATORY)
+
+You must implement and test:
+	•	Snapshot generation
+	•	Snapshot verification
+	•	Snapshot expiration
+	•	Offline evaluation parity
+
+⸻
+
+5️⃣ Tests (MANDATORY)
+
+Create a comprehensive test suite proving:
+
+Visibility Gating
+	•	Permission missing → section hidden
+	•	Entitlement missing → section hidden
+	•	Feature flag disabled → section hidden
+
+Determinism
+	•	Same input → same output (10× repeat test)
+
+Snapshot Integrity
+	•	Valid snapshot verifies
+	•	Tampered snapshot fails
+	•	Expired snapshot fails
+
+Tenant Isolation
+	•	Cross-tenant access throws error
+
+⸻
+
+6️⃣ Registered Capabilities
+
+Register the following capabilities in module.manifest.json:
+
+[
+  "dashboard:tenant.resolve",
+  "dashboard:tenant.snapshot.generate",
+  "dashboard:tenant.snapshot.verify"
+]
+
+
+⸻
+
+HARD STOP CONDITION (MUST BE PROVEN)
+
+A Tenant Suite can request its dashboard online or offline and receive a deterministic, explainable, verifiable result where every visible or hidden section is justified exclusively by permissions, entitlements, and feature flags.
+
+You must include a hard-stop test explicitly proving this.
+
+⸻
+
+REQUIRED FINAL OUTPUT
+
+When complete, provide a Phase 4D Completion Report containing:
+	1.	Section list + gating matrix
+	2.	Proof of Phase 4A engine consumption
+	3.	Snapshot verification evidence
+	4.	Test results summary
+	5.	Final commit SHA
+
+⸻
+
+STOP CLAUSE
+
+⛔ STOP immediately after completion
+⛔ Do NOT proceed to any further phase
+⛔ Await explicit authorization
+
+⸻
+
+ACKNOWLEDGEMENT FORMAT
+
+Reply only with:
+
+“Acknowledged. Proceeding with Phase 4D execution exactly as instructed.”
+
+Then begin.
