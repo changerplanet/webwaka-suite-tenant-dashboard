@@ -118,7 +118,7 @@ The tenant dashboard resolver exclusively consumes Phase 4A primitives:
 
 ## 5. Final Commit SHA
 
-**Commit:** `2390fad29c0540c8d6ae06b33f42fc764cb77cab`
+**Commit:** `2c37ced30fbe984883ff8d6ced0d0df5da15efe8`
 
 ---
 
