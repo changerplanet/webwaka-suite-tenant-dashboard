@@ -1,14 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { TENANT_DASHBOARD } from '../src/dashboards/tenant.dashboard.js';
 import { TENANT_DASHBOARD_SECTIONS } from '../src/dashboards/tenant.sections.js';
 import { resolveDashboard } from '../src/engine/phase4aConsumer.js';
 import {
+  configureSnapshotSecret,
+  clearSnapshotSecret,
   generateDashboardSnapshot,
   verifyDashboardSnapshot,
   evaluateFromSnapshot
 } from '../src/engine/snapshotEngine.js';
 import { TenantDashboardResolver } from '../src/engine/tenantDashboardResolver.js';
 import type { EvaluationContext } from '../src/types/index.js';
+
+const TEST_SECRET = 'test-secret-key-for-unit-tests-32chars-minimum';
+const WRONG_SECRET = 'wrong-secret-key-for-forgery-test-32chars-min';
 
 describe('Tenant Dashboard Declaration', () => {
   it('should have exactly 12 sections', () => {
@@ -136,7 +141,46 @@ describe('Determinism', () => {
   });
 });
 
+describe('Snapshot Configuration', () => {
+  afterEach(() => {
+    clearSnapshotSecret();
+  });
+
+  it('should throw error when secret is not configured', () => {
+    const context: EvaluationContext = {
+      tenantId: 'tenant-config-test',
+      userId: 'user-config-test',
+      permissions: ['tenant:overview:read'],
+      entitlements: [],
+      featureFlags: [],
+      timestamp: Date.now()
+    };
+    const resolved = resolveDashboard(TENANT_DASHBOARD, context);
+    expect(() => generateDashboardSnapshot(resolved, 24)).toThrow(
+      'Snapshot secret not configured'
+    );
+  });
+
+  it('should reject short secrets', () => {
+    expect(() => configureSnapshotSecret('short')).toThrow(
+      'Snapshot secret must be at least 32 characters'
+    );
+  });
+
+  it('should accept valid secrets', () => {
+    expect(() => configureSnapshotSecret(TEST_SECRET)).not.toThrow();
+  });
+});
+
 describe('Snapshot Integrity', () => {
+  beforeEach(() => {
+    configureSnapshotSecret(TEST_SECRET);
+  });
+
+  afterEach(() => {
+    clearSnapshotSecret();
+  });
+
   const fullContext: EvaluationContext = {
     tenantId: 'tenant-snapshot-test',
     userId: 'user-snapshot-test',
@@ -194,6 +238,19 @@ describe('Snapshot Integrity', () => {
     const offlineResolved = evaluateFromSnapshot(snapshot);
     expect(JSON.stringify(offlineResolved)).toBe(JSON.stringify(resolved));
   });
+
+  it('should fail verification for snapshot signed with wrong secret', () => {
+    const resolved = resolveDashboard(TENANT_DASHBOARD, fullContext);
+    const snapshot = generateDashboardSnapshot(resolved, 24);
+    
+    clearSnapshotSecret();
+    configureSnapshotSecret(WRONG_SECRET);
+    
+    const verification = verifyDashboardSnapshot(snapshot);
+    expect(verification.valid).toBe(false);
+    expect(verification.tampered).toBe(true);
+    expect(verification.reason).toBe('Snapshot signature verification failed');
+  });
 });
 
 describe('Tenant Isolation', () => {
@@ -226,6 +283,14 @@ describe('Tenant Isolation', () => {
 });
 
 describe('Hard-Stop Condition: Deterministic Explainable Verifiable Result', () => {
+  beforeEach(() => {
+    configureSnapshotSecret(TEST_SECRET);
+  });
+
+  afterEach(() => {
+    clearSnapshotSecret();
+  });
+
   it('HARD-STOP: Tenant receives deterministic, explainable, verifiable dashboard both online and offline', () => {
     const currentTime = Date.now();
     const context: EvaluationContext = {
@@ -263,6 +328,14 @@ describe('Hard-Stop Condition: Deterministic Explainable Verifiable Result', () 
 
 describe('TenantDashboardResolver Class', () => {
   const resolver = new TenantDashboardResolver();
+
+  beforeEach(() => {
+    configureSnapshotSecret(TEST_SECRET);
+  });
+
+  afterEach(() => {
+    clearSnapshotSecret();
+  });
 
   it('should resolve dashboard through resolver class', () => {
     const context: EvaluationContext = {
