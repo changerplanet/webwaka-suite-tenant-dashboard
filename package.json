@@ -1,20 +1,25 @@
 {
   "name": "webwaka-suite-tenant-dashboard",
-  "version": "0.0.0",
-  "description": "WebWaka Dashboard Suite Module",
+  "version": "1.0.0",
+  "description": "WebWaka Tenant Dashboard - Phase 4D Declarative Consumer",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["webwaka", "dashboard", "tenant"],
+  "author": "WebWaka Team",
+  "license": "Proprietary",
   "dependencies": {
-    "@vitejs/plugin-react": "^5.1.2",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "vite": "^7.3.1"
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^25.0.9",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
   }
 }

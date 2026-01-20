@@ -1,12 +1,20 @@
 {
   "moduleId": "webwaka-suite-tenant-dashboard",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "class": "suite",
   "type": "dashboard",
-  "dependencies": [],
-  "capabilities": [],
+  "dependencies": [
+    "webwaka-core-dashboard-control"
+  ],
+  "capabilities": [
+    "dashboard:tenant.resolve",
+    "dashboard:tenant.snapshot.generate",
+    "dashboard:tenant.snapshot.verify"
+  ],
   "metadata": {
     "author": "WebWaka Team",
-    "license": "Proprietary"
+    "license": "Proprietary",
+    "phase": "4D",
+    "description": "Tenant Dashboard - Pure Declarative Consumer"
   }
 }
